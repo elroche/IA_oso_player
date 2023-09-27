@@ -1,2 +1,4 @@
-venv
-.ipynb_checkpoints
+## Virtuel Environment Skips
+.venv
+poetry.lock
+
