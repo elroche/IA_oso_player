@@ -1,0 +1,4 @@
+## Virtuel Environment Skips
+.venv
+poetry.lock
+data
