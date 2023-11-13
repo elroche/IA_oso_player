@@ -1,21 +1,17 @@
-import sys
 import numpy as np
+import matplotlib.pyplot as plt
+from PIL import ImageGrab , Image
+import time
 
-def bytes_to_numpy(serialized_arr: str) -> np.array:
-    sep = '|'.encode('utf-8')
-    print(sep)
-    i_0 = serialized_arr.find(sep)
-    i_1 = serialized_arr.find(sep, i_0 + 1)
-    arr_dtype = serialized_arr[:i_0].decode('utf-8')
-    arr_shape = tuple([int(a) for a in serialized_arr[i_0 + 1:i_1].decode('utf-8').split(',')])
-    arr_str = serialized_arr[i_1 + 1:]
-    arr = np.frombuffer(arr_str, dtype = arr_dtype).reshape(arr_shape)
-    return arr
-
+fps =30
+read_shape = (1080,1920)
+shared_array = np.memmap("../tmp/testarray", mode='r', shape=read_shape)
+T = time.time()
 
 while True:
-    line = sys.stdin.readline()
-    if line:
-        print(bytes_to_numpy(line))
-    else:
-        continue
+    Y = time.time()
+    if(Y-T>1/fps):
+        T = time.time()
+    # shared_array will behave as a numpy ndarray
+        img = shared_array[:]
+        plt.imsave('../tmp/test.jpg',img,cmap='Greys_r')
