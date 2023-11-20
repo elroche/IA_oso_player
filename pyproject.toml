@@ -16,6 +16,7 @@ torch = { version = "^2.0.0 , !=2.0.1", source = "torch-cpu" }
 torchvision = { version = "*", source = "torch-cpu" }
 opencv-python = "^4.7.0"
 pyautogui = "^0.9.54"
+pytesseract = "^0.3.10"
 
 [tool.poetry.group.dev.dependencies]
 jupytext = "^1.15.2"
