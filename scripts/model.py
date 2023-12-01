@@ -5,7 +5,7 @@ import time
 
 fps =30
 read_shape = (1080,1920)
-shared_array = np.memmap("../tmp/testarray", mode='r', shape=read_shape)
+shared_array = np.memmap("../tmp/screenshot", mode='r', shape=read_shape)
 T = time.time()
 
 while True:
