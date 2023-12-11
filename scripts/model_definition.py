@@ -1,4 +1,5 @@
 from PIL import ImageGrab
+from PIL import Image
 import cv2 as cv
 
 import numpy as np
@@ -7,7 +8,7 @@ import matplotlib.pyplot as plt
 import torch
 
 from torchvision.models.detection import fasterrcnn_resnet50_fpn
-from torchvision.transforms import functional as F
+from torchvision.transforms import functional
 from torchvision import transforms
 
 import torch.nn.functional as F
@@ -21,13 +22,8 @@ import os
 
 torch.cuda.is_available()
 
-def flatten_image(contours_image):
-    # Aplatir l'image en une seule colonne
-    flattened_image = contours_image.flatten()
-
-    # Renvoyer la matrice aplatie
-    return flattened_image
-
+# Classe de détecion de contour
+# (utilisation de conv2d (CNN) sur les images)
 class ContourDetector(nn.Module):
     def __init__(self):
 
@@ -52,10 +48,8 @@ class ContourDetector(nn.Module):
 
         return z,y
 
-contour_model = ContourDetector()
-transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize([0.5, ], [0.5, ])])
-print(contour_model)
 
+# Fonction de la détection du score et de la précision
 def detect_numbers(image):
     # Charger un modèle Faster R-CNN pré-entraîné
     model = fasterrcnn_resnet50_fpn(pretrained=True)
@@ -65,18 +59,16 @@ def detect_numbers(image):
     width, height = image.size
 
     # Définir les coordonnées de la région à traiter (1/4 de la longueur et 1/4 de la hauteur)
-    region_left = int(0.75 * width)
+    region_left = int(0.80 * width)
     region_top = 0
     region_right = width
-    region_bottom = int(0.25 * height)
+    region_bottom = int(0.15 * height)
 
     # Extraire la région à traiter
     region = image.crop((region_left, region_top, region_right, region_bottom))
-    plt.imshow(region)
-    image.show()
 
     # Appliquer les transformations nécessaires à la région
-    region_tensor = F.to_tensor(region)
+    region_tensor = functional.to_tensor(region)
     region_tensor = region_tensor.unsqueeze(0)  # Ajouter une dimension pour le lot
 
     # Effectuer l'inférence sur la région
@@ -94,9 +86,8 @@ def detect_numbers(image):
 
     return prediction, region, filtered_result  # Retourner également le résultat filtré pour une utilisation ultérieure
 
+# Fonction pour extraire le score et la précision à partir du filtered_result
 def extraire_score_precision(filtered_result):
-    # Fonction pour extraire le score et la précision à partir du filtered_result
-
     # Extraire le score (le score étant sur la première ligne)
     lignes = filtered_result.split('\n')
     score_str = lignes[0].strip().split()[-1]
@@ -109,6 +100,17 @@ def extraire_score_precision(filtered_result):
 
     return score, precision
 
+
+# Fonction générale de détection du score et de la précision
+def process_image(image):
+    # Detection des nombres sur l'image
+    _, region, filtered_result = detect_numbers(image)
+    # Extraire le score et la précision
+    score, precision = extraire_score_precision(filtered_result)
+    return image, region, filtered_result, score, precision
+
+
+# Fonction de comparaison du score et de la précision de 2 images
 def difference_scores_precisions(filtered_result_precedente, filtered_result_actuelle):
     # Extraire le score et la précision des prédictions
     score_precedent, precision_precedente = extraire_score_precision(filtered_result_precedente)
@@ -120,32 +122,40 @@ def difference_scores_precisions(filtered_result_precedente, filtered_result_act
 
     return difference_score, difference_precision
 
-# Récupération des screenshots
+
+# Initialisation du modèle, à mettre dans fonction
+contour_model = ContourDetector()
+transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize([0.5, ], [0.5, ])])
+print(contour_model)
+
+
+##################### Test des fonctions #####################
+
+def test_recuperation_image() :
+    i = 0
+    screenshots = []
+    while (i<200) :
+        screenshot = ImageGrab.grab().convert('L')
+        screenshots.append(screenshot)
+        i += 1
+    return screenshots
+
+# Récupération des screenshots, conversion en tableau NumPy, puis en objet PIL.Image (sera fait dans le traitement)
 screenshots = test_recuperation_image()
 image_precedente = screenshots[-8]
 image_actuelle = screenshots[-1]
-
-# Convertir les screenshots en tableau NumPy
 image_precedente_np = np.array(image_precedente)
 image_actuelle_np = np.array(image_actuelle)
-
-# Convertir les screenshots en objet PIL.Image
 pil_image_precedente = Image.fromarray(image_precedente_np)
 pil_image_actuelle = Image.fromarray(image_actuelle_np)
 
-# Appeler la fonction de détection
-prediction_precedente, region_precedente, filtered_result_precedente = detect_numbers(pil_image_precedente)
-prediction_actuelle, region_actuelle, filtered_result_actuelle = detect_numbers(pil_image_actuelle)
-
-# Afficher les résultats de la fonction de prédiction
-print("Résultat de la reconnaissance de nombres de l'image précédente :", filtered_result_precedente)
-print("Résultat de la reconnaissance de nombres de l'image actuelle :", filtered_result_actuelle)
+# Appeler la fonction globale de détection
+pil_image_precedente, region_precedente, filtered_result_precedente, score_precedent, precision_precedente = process_image(pil_image_precedente)
+pil_image_actuelle, region_actuelle, filtered_result_actuelle, score_actuel, precision_actuelle = process_image(pil_image_actuelle)
 
 # Extraction du score et de la précision des prédictions faites sur les images (pas obligatoire car fait dans la fonction extraire_score_precision)
-score_actuel, precision_actuelle = extraire_score_precision(filtered_result_actuelle)
 print("Score de l'image actuelle :", score_actuel)
 print("Precision de l'image actuelle :", precision_actuelle)
-score_precedent, precision_precedente = extraire_score_precision(filtered_result_precedente)
 print("Score de l'image précédente :", score_precedent)
 print("Precision de l'image précédente :", precision_precedente)
 
