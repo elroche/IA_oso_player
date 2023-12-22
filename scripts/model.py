@@ -33,7 +33,7 @@ def save_image():
             img = que.get()
             #this is where u have image cropping and number detection
             # the img object is a numpy array containing the full screenshot size 1080,1920
-            except:
+    except:
         return -1
 # Create two threads
 thread1 = threading.Thread(target=get_pipeline)
