@@ -26,6 +26,8 @@ torch.cuda.is_available()
 
 # Classe de détecion de contour
 # (utilisation de conv2d (CNN) sur les images)
+
+
 class ContourDetector(nn.Module):
     def __init__(self):
 
@@ -72,7 +74,8 @@ def detect_numbers(image):
 
     # Appliquer les transformations nécessaires à la région
     region_tensor = functional.to_tensor(region)
-    region_tensor = region_tensor.unsqueeze(0)  # Ajouter une dimension pour le lot
+    region_tensor = region_tensor.unsqueeze(
+        0)  # Ajouter une dimension pour le lot
 
     # Effectuer l'inférence sur la région
     with torch.no_grad():
@@ -162,12 +165,12 @@ def scores_precision_difference(filtered_result_precedente, filtered_result_actu
 contour_model = ContourDetector()
 transform = transforms.Compose(
     [transforms.ToTensor(), transforms.Normalize([0.5, ], [0.5, ])])
-#print(contour_model)
+# print(contour_model)
 
 
 ##################### Test des fonctions #####################
 
-def test_recuperation_image():
+"""def test_recuperation_image():
     i = 0
     screenshots = []
     while (i < 200):
@@ -204,4 +207,4 @@ score_difference, precision_difference = scores_precision_difference(
 
 # Afficher les résultats du test, cad de la différence du score et de la précision entre les deux images
 print("Différence du score :", score_difference)
-print("Différence de la précision :", precision_difference)
+print("Différence de la précision :", precision_difference)"""
