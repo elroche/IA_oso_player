@@ -33,6 +33,7 @@ def save_image():
             img = que.get()
             #this is where u have image cropping and number detection
             # the img object is a numpy array containing the full screenshot size 1080,1920
+            plt.imsave('../tmp/test.jpg', img , cmap = 'gray')
     except:
         return -1
 # Create two threads
