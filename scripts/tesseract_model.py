@@ -103,3 +103,21 @@ def process_image(image):
     score, precision = extraction_score_precision(filtered_result)
     print(time.time() - T)
     return score, precision
+
+# Fonction de comparaison du score et de la précision de 2 images
+def scores_precision_difference(filtered_result_precedente, filtered_result_actuelle):
+    # Extraire le score et la précision des prédictions
+    previous_score, previous_precision = extraction_score_precision(
+        filtered_result_precedente)
+    current_score, current_precision = extraction_score_precision(
+        filtered_result_actuelle)
+
+    if previous_score is None or current_score is None or previous_precision is None or current_precision is None:
+        print("Aucun nombre détecté. Impossible de calculer la différence.")
+        return None, None
+
+    # Calculer la différence du score et de la précision
+    score_difference = current_score - previous_score
+    precision_difference = current_precision - previous_precision
+
+    return score_difference, precision_difference

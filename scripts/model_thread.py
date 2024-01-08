@@ -34,7 +34,7 @@ def get_pipeline():
     print("Pipeline ended")
 
 
-def save_image():
+def tesseract_model():
     global que
     try:
         while True:
@@ -51,7 +51,7 @@ def save_image():
 
 # Create two threads
 thread1 = threading.Thread(target=get_pipeline)
-thread2 = threading.Thread(target=save_image)
+thread2 = threading.Thread(target=tesseract_model)
 
 # Start the threads
 thread1.start()
