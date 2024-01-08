@@ -22,12 +22,8 @@ import os
 
 import warnings
 
-torch.cuda.is_available()
-
 # Classe de détecion de contour
 # (utilisation de conv2d (CNN) sur les images)
-
-
 class ContourDetector(nn.Module):
     def __init__(self):
 
@@ -50,96 +46,6 @@ class ContourDetector(nn.Module):
 
         return z, y
 
-
-# Fonction de la détection du score et de la précision
-def detect_numbers(image):
-    # Charger un modèle Faster R-CNN pré-entraîné
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        model = fasterrcnn_resnet50_fpn(pretrained=True)
-        model.eval()
-    warnings.resetwarnings()
-
-    # Récupérer les dimensions originales de l'image
-    width, height = image.size
-
-    # Définir les coordonnées de la région à traiter
-    region_left = int(0.80 * width)
-    region_top = 0
-    region_right = width
-    region_bottom = int(0.15 * height)
-
-    # Extraire la région à traiter
-    region = image.crop((region_left, region_top, region_right, region_bottom))
-
-    # Appliquer les transformations nécessaires à la région
-    region_tensor = functional.to_tensor(region)
-    region_tensor = region_tensor.unsqueeze(
-        0)  # Ajouter une dimension pour le lot
-
-    # Effectuer l'inférence sur la région
-    with torch.no_grad():
-        prediction = model(region_tensor)
-
-    # Convertir la région en niveaux de gris
-    region_gray = region.convert('L')
-
-    # Utiliser Tesseract OCR pour reconnaître le texte dans la région
-    result = pytesseract.image_to_string(region_gray)
-
-    # Filtrer les caractères pour ne conserver que les nombres, le caractère "%", et le retour à a ligne pour séparer les 2 résultats
-    filtered_result = re.sub(r'[^0-9%\n,.]', '', result)
-
-    # Retourner également le résultat filtré pour une utilisation ultérieure
-    return prediction, region, filtered_result
-
-
-# Fonction pour extraire le score et la précision à partir du filtered_result
-def extraction_score_precision(filtered_result):
-    # Vérifier si filtered_result est une chaîne vide ou ne contient que des espaces
-    if not filtered_result or filtered_result.isspace() or filtered_result.isalpha():
-        print("Aucun nombre détecté.")
-        return None, None
-
-    # Extraire le score (le score étant sur la première ligne)
-    lines = filtered_result.split('\n')
-
-    # Vérifier si lines a au moins une ligne
-    if not lines:
-        print("Aucune ligne trouvée.")
-        return None, None
-
-    # Accéder à la première ligne
-    first_line = lines[0].strip().split()
-
-    # Vérifier si la première ligne a suffisamment d'éléments
-    if not first_line:
-        print("Aucun élément trouvé dans la première ligne.")
-        return None, None
-
-    score_str = first_line[-1]
-    score = int(score_str)
-
-    # Extraire la précision (la précision étant sur la deuxième ligne)
-    precision_str = lines[2].strip().replace('%', '')
-    # Remplacer la virgule par un point
-    precision_str = precision_str.replace(',', '.')
-    precision = float(precision_str)
-
-    return score, precision
-
-
-# Fonction générale de détection du score et de la précision
-def process_image(image):
-    # Detection des nombres sur l'image
-    _, region, filtered_result = detect_numbers(image)
-
-    if filtered_result is None:
-        print("Aucun nombre détecté. Traitement arrêté.")
-        return None
-    # Extraire le score et la précision
-    score, precision = extraction_score_precision(filtered_result)
-    return image, region, filtered_result, score, precision
 
 
 # Fonction de comparaison du score et de la précision de 2 images
