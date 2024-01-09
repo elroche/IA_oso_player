@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 import re
 import warnings
 import time
+from PIL import Image
+from queue import Queue
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -121,3 +123,15 @@ def scores_precision_difference(filtered_result_precedente, filtered_result_actu
     precision_difference = current_precision - previous_precision
 
     return score_difference, precision_difference
+
+def tesseract_model(que : Queue):
+    try:
+        while True:
+            img = que.get()
+            score, precision = process_image(Image.fromarray(img))
+            # Print the detected score and precision
+            print("Detected Score:", score)
+            print("Detected Precision:", precision)
+    except Exception as e:
+        print(f"Error in save_image: {e}")
+        return -1

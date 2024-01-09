@@ -4,54 +4,29 @@ import matplotlib.pyplot as plt
 from PIL import ImageGrab, Image
 
 import threading
-import time
 from queue import Queue
 
-from scripts.tesseract_model import process_image
+from tesseract_model import tesseract_model
+from pipeline_thread import pipeline_thread
 
 que = Queue()
 
-def get_pipeline():
-    fps = 30
-    read_shape = (1080, 1920)
-    shared_array = np.memmap("../tmp/screenshot", mode='r', shape=read_shape)
-    T = time.time()
-    flag = False
-
-    global que
-    try:
-        while flag:
-            flag 
-            Y = time.time()
-            if (Y - T > 1 / fps):
-                T = time.time()
-                img = shared_array[:]
-                que.put(img)
-    except Exception as e:
-        print(f"Error in get_pipeline: {e}")
-        return -1
-    
-    print("Pipeline ended")
-
-
-def tesseract_model():
-    global que
+def test_thread(que : Queue):
+    print("Test Thread entered")
     try:
         while True:
-            img = que.get()
-            plt.imsave("../tmp/test.jpg" , img , cmap = 'grey')
-            # score, precision = process_image(Image.fromarray(img))
-            # # Print the detected score and precision
-            # print("Detected Score:", score)
-            # print("Detected Precision:", precision)
+            print(que.qsize())
+            # img = que.get()
+            # plt.imsave("../tmp/test.jpg" , img , cmap = 'grey')
+            # print("Image saved")
     except Exception as e:
         print(f"Error in save_image: {e}")
         return -1
 
 
 # Create two threads
-thread1 = threading.Thread(target=get_pipeline)
-thread2 = threading.Thread(target=tesseract_model)
+thread1 = threading.Thread(target=pipeline_thread, args=(que,))
+thread2 = threading.Thread(target=test_thread, args=(que,))
 
 # Start the threads
 thread1.start()
