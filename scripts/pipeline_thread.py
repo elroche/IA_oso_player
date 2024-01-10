@@ -13,9 +13,12 @@ pausing_flag  = False
 
 def on_release(key):
     global pausing_flag
-    if key == keyboard.Key.esc or key.char == 'p': 
-        pausing_flag = not pausing_flag
-        print("Pipeline paused" if pausing_flag == False else "Pipeline started")
+    try:
+        if key == keyboard.Key.esc or key.char == 'p': 
+            pausing_flag = not pausing_flag
+            print("Pipeline paused" if pausing_flag == False else "Pipeline started")
+    except:
+        pass
 
 def pipeline_thread(que : Queue) -> None:
     T = time.time()

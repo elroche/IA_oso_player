@@ -6,6 +6,9 @@ from torchvision.transforms import functional
 import pytesseract
 
 import matplotlib.pyplot as plt
+import numpy as np 
+
+
 import re
 import warnings
 import time
@@ -49,14 +52,12 @@ def detect_numbers(image):
     result = pytesseract.image_to_string(region)
     # Filtrer les caractères pour ne conserver que les nombres, et le retour à a ligne pour séparer les 2 résultats
     filtered_result = re.sub(r'[^0-9\n,.]', '', result)
-    print(filtered_result)
     # Retourner également le résultat filtré pour une utilisation ultérieure
     return prediction, filtered_result
 
 
 # Fonction pour extraire le score et la précision à partir du filtered_result
 def extraction_score_precision(filtered_result):
-    print(filtered_result)
     # Vérifier si filtered_result est une chaîne vide ou ne contient que des espaces
     if not filtered_result or filtered_result.isspace() or filtered_result.isalpha():
         print("Aucun nombre détecté.")
@@ -96,7 +97,7 @@ def extraction_score_precision(filtered_result):
 def process_image(image):
     # Detection des nombres sur l'image
     T = time.time()
-    _, _, filtered_result = detect_numbers(image)
+    _, filtered_result = detect_numbers(image)
 
     if filtered_result is None:
         print("Aucun nombre détecté. Traitement arrêté.")
@@ -128,10 +129,16 @@ def tesseract_model(que : Queue):
     try:
         while True:
             img = que.get()
-            score, precision = process_image(Image.fromarray(img))
+            score, precision = process_image(img)
             # Print the detected score and precision
             print("Detected Score:", score)
             print("Detected Precision:", precision)
     except Exception as e:
-        print(f"Error in save_image: {e}")
+        print(f"Error in tesseract_model: {e}")
         return -1
+    
+# img = Image.open("../tmp/test.jpg")
+# process_image(img)
+# que = Queue()
+# que.put(img)
+# tesseract_model(que)

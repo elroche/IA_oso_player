@@ -15,9 +15,9 @@ def test_thread(que : Queue):
     print("Test Thread entered")
     try:
         while True:
-            # img = que.get()
-            print("Size of the queue : ",que.qsize())
-            # plt.imsave("../tmp/test.jpg" , img , cmap = 'grey')
+            img = que.get()
+            # print("Size of the queue : ",que.qsize())
+            plt.imsave("../tmp/test.jpg" , img , cmap = 'grey')
             # print("Image saved")
     except Exception as e:
         print(f"Error in save_image: {e}")
