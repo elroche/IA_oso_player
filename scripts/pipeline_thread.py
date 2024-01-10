@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from pynput import keyboard
 from PIL import ImageGrab , Image
 import time
@@ -28,6 +29,8 @@ def pipeline_thread(que : Queue) -> None:
             Y = time.time()
             if pausing_flag and (Y-T>1/fps):
                 T = time.time()
-                screenshot = np.array(ImageGrab.grab().convert('L'))
+                screenshot = ImageGrab.grab(bbox=(0,0,1920,1080)).convert('L')
+                # plt.imshow(screenshot)
+                # plt.show()
                 que.put(screenshot)
             

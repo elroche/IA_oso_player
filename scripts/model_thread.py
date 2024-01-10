@@ -17,7 +17,7 @@ def test_thread(que : Queue):
         while True:
             img = que.get()
             # print("Size of the queue : ",que.qsize())
-            plt.imsave("../tmp/test.jpg" , img , cmap = 'grey')
+            plt.imsave("tmp/test.jpg" , img , cmap = 'grey')
             # print("Image saved")
     except Exception as e:
         print(f"Error in save_image: {e}")
@@ -26,7 +26,7 @@ def test_thread(que : Queue):
 
 # Create two threads
 thread1 = threading.Thread(target=pipeline_thread, args=(que,))
-thread2 = threading.Thread(target=test_thread, args=(que,))
+thread2 = threading.Thread(target=tesseract_model, args=(que,))
 
 # Start the threads
 thread1.start()

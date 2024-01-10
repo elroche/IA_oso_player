@@ -19,13 +19,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Fonction de la détection du score et de la précision
 def detect_numbers(image):
-    # Charger un modèle Faster R-CNN pré-entraîné
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        model = fasterrcnn_resnet50_fpn(pretrained=True)
-        model.eval()
-    warnings.resetwarnings()
-
+    
     # Récupérer les dimensions originales de l'image
     width, height = image.size
 
@@ -37,8 +31,10 @@ def detect_numbers(image):
 
     # Extraire la région à traiter
     region = image.crop((region_left, region_top, region_right, region_bottom))
-    # plt.imshow(region); plt.show()
 
+    plt.imsave("tmp/test_region.jpg",region,cmap='gray')
+
+    '''
     # Appliquer les transformations nécessaires à la région
     region_tensor = functional.to_tensor(region)
     region_tensor = region_tensor.unsqueeze(
@@ -47,13 +43,16 @@ def detect_numbers(image):
     # Effectuer l'inférence sur la région
     with torch.no_grad():
         prediction = model(region_tensor)
-
+    '''
     # Utiliser Tesseract OCR pour reconnaître le texte dans la région
     result = pytesseract.image_to_string(region)
     # Filtrer les caractères pour ne conserver que les nombres, et le retour à a ligne pour séparer les 2 résultats
     filtered_result = re.sub(r'[^0-9\n,.]', '', result)
-    # Retourner également le résultat filtré pour une utilisation ultérieure
-    return prediction, filtered_result
+    
+    '''# Retourner également le résultat filtré pour une utilisation ultérieure
+    return prediction, filtered_result'''
+
+    return filtered_result
 
 
 # Fonction pour extraire le score et la précision à partir du filtered_result
@@ -65,6 +64,7 @@ def extraction_score_precision(filtered_result):
 
     # Extraire le score (le score étant sur la première ligne)
     lines = filtered_result.split('\n')
+    print(lines)
 
     # Vérifier si lines a au moins une ligne
     if not lines:
@@ -72,23 +72,22 @@ def extraction_score_precision(filtered_result):
         return None, None
 
     # Accéder à la première ligne
-    first_line = lines[0].strip().split()
+    first_line = lines[0].replace(',', '.')
 
     # Vérifier si la première ligne a suffisamment d'éléments
-    if not first_line:
+    if len(lines)<2:
         print("Aucun élément trouvé dans la première ligne.")
         return None, None
 
     score_str = first_line[-1]
     score = int(score_str)
 
-    # Extraire la précision (la précision étant sur la deuxième ligne)
-    precision_str = lines[2].strip().replace('%', '')
-    # Extraire la précision (la précision étant sur la deuxième ligne)
-    precision_str = lines[2].strip().replace('%', '')
+    ''' # Extraire la précision (la précision étant sur la deuxième ligne)
+    precision_str = lines[1].strip().replace('%', '')
     # Remplacer la virgule par un point
     precision_str = precision_str.replace(',', '.')
-    precision = float(precision_str)
+    precision = float(precision_str)'''
+    precision = 0
 
     return score, precision
 
@@ -96,15 +95,13 @@ def extraction_score_precision(filtered_result):
 # Fonction générale de détection du score et de la précision
 def process_image(image):
     # Detection des nombres sur l'image
-    T = time.time()
-    _, filtered_result = detect_numbers(image)
+    filtered_result = detect_numbers(image)
 
     if filtered_result is None:
         print("Aucun nombre détecté. Traitement arrêté.")
         return None , None
     # Extraire le score et la précision
     score, precision = extraction_score_precision(filtered_result)
-    print(time.time() - T)
     return score, precision
 
 # Fonction de comparaison du score et de la précision de 2 images
@@ -126,13 +123,24 @@ def scores_precision_difference(filtered_result_precedente, filtered_result_actu
     return score_difference, precision_difference
 
 def tesseract_model(que : Queue):
+    # Charger un modèle Faster R-CNN pré-entraîné
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        model = fasterrcnn_resnet50_fpn(pretrained=True)
+        model.eval()
+    warnings.resetwarnings()
+
     try:
         while True:
+            T = time.time()
             img = que.get()
+            img.save("tmp/test.jpg")
+            # detect_numbers(img,model)
             score, precision = process_image(img)
             # Print the detected score and precision
             print("Detected Score:", score)
             print("Detected Precision:", precision)
+            print("Time taken :" ,time.time() - T)
     except Exception as e:
         print(f"Error in tesseract_model: {e}")
         return -1

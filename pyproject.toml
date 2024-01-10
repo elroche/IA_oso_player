@@ -21,6 +21,7 @@ pynput = "^1.7.6"
 
 torch = { version = "^2.0.0 , !=2.0.1", source = "torch-cpu" }
 torchvision = { version = "*", source = "torch-cpu" }
+mss = "^9.0.1"
 
 [tool.poetry.group.dev.dependencies]
 jupytext = "^1.15.2"
