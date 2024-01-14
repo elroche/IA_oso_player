@@ -18,7 +18,7 @@ from queue import Queue
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Fonction de la détection du score et de la précision
-def detect_numbers(image):
+def detect_numbers(image, model):
     
     # Récupérer les dimensions originales de l'image
     width, height = image.size
@@ -34,16 +34,14 @@ def detect_numbers(image):
 
     plt.imsave("tmp/test_region.jpg",region,cmap='gray')
 
-    '''
     # Appliquer les transformations nécessaires à la région
     region_tensor = functional.to_tensor(region)
-    region_tensor = region_tensor.unsqueeze(
-        0)  # Ajouter une dimension pour le lot
+    region_tensor = region_tensor.unsqueeze(0)  # Ajouter une dimension pour le lot
 
     # Effectuer l'inférence sur la région
     with torch.no_grad():
         prediction = model(region_tensor)
-    '''
+
     # Utiliser Tesseract OCR pour reconnaître le texte dans la région
     result = pytesseract.image_to_string(region)
     # Filtrer les caractères pour ne conserver que les nombres, et le retour à a ligne pour séparer les 2 résultats
@@ -93,9 +91,9 @@ def extraction_score_precision(filtered_result):
 
 
 # Fonction générale de détection du score et de la précision
-def process_image(image):
+def process_image(image,model):
     # Detection des nombres sur l'image
-    filtered_result = detect_numbers(image)
+    filtered_result = detect_numbers(image,model)
 
     if filtered_result is None:
         print("Aucun nombre détecté. Traitement arrêté.")
@@ -136,10 +134,11 @@ def tesseract_model(que : Queue):
             img = que.get()
             img.save("tmp/test.jpg")
             # detect_numbers(img,model)
-            score, precision = process_image(img)
+            score, precision = process_image(img,model)
             # Print the detected score and precision
-            print("Detected Score:", score)
-            print("Detected Precision:", precision)
+            print("Queue lenght : ", que.qsize())
+            # print("Detected Score:", score)
+            # print("Detected Precision:", precision)
             print("Time taken :" ,time.time() - T)
     except Exception as e:
         print(f"Error in tesseract_model: {e}")
