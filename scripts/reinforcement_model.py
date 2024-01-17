@@ -133,7 +133,7 @@ model = ReinforcementModel(hidden_size)
 
 def test_recuperation_image(folder_path="images_test"):
     screenshots = []
-    for i in range(20):
+    for i in range(19):
         image_path = os.path.join(folder_path, f"image_{i+1}.jpg")
         screenshot = Image.open(image_path).convert('L')
         screenshots.append(screenshot)
