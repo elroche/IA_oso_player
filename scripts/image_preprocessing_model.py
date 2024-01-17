@@ -22,20 +22,21 @@ import os
 
 import warnings
 
-# Classe de détecion de contour
-# (utilisation de conv2d (CNN) sur les images)
+# Contour detection class
+
+
 class ContourDetector(nn.Module):
     def __init__(self):
 
         super(ContourDetector, self).__init__()
 
-        # Couches de convolution
+        # Convolution layers
         self.Conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
-        # : division de la taille de la matrice de contours par 2, je trouve ça bien comme résultat
+        # Division of the size of the contour matrix by 2
         self.Conv2 = nn.Conv2d(32, 1, kernel_size=3, stride=1, padding=1)
 
-        # Couches de pooling
-        # division de la taille de la matrice de contours par 4(stride ici a 2 et a la 2e couche de conv stride à 1)
+        # Pooling layers
+        # Division of the size of the contour matrix by 4
         self.Pool = nn.MaxPool2d(kernel_size=1, stride=2, padding=0)
         self.Flat = nn.Flatten()
 
@@ -46,16 +47,16 @@ class ContourDetector(nn.Module):
 
         return z, y
 
-# Initialisation du modèle, à mettre dans fonction
+##################### Test des fonctions #####################
+
+
+"""
+# Initialise the model
 contour_model = ContourDetector()
 transform = transforms.Compose(
     [transforms.ToTensor(), transforms.Normalize([0.5, ], [0.5, ])])
-# print(contour_model)
 
-
-##################### Test des fonctions #####################
-
-"""def test_recuperation_image():
+def test_recuperation_image():
     i = 0
     screenshots = []
     while (i < 200):
@@ -92,4 +93,5 @@ score_difference, precision_difference = scores_precision_difference(
 
 # Afficher les résultats du test, cad de la différence du score et de la précision entre les deux images
 print("Différence du score :", score_difference)
-print("Différence de la précision :", precision_difference)"""
+print("Différence de la précision :", precision_difference)
+"""
