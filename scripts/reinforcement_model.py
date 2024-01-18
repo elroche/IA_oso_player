@@ -173,7 +173,7 @@ for i, image_data in enumerate(screenshots):
     print("i : ", i)
     # Prétraitement avec le modèle de détection de contours
     image_data = transform(image_data)
-    contours = contour_model(image_data)
+    _, contours = contour_model(image_data)
     # Maintenant, contours contient les résultats de la détection de contours
     # print("Dimensions de la première image après contour 1: ", contours.shape)
 
