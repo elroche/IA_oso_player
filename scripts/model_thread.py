@@ -7,51 +7,39 @@ import threading
 import time
 from queue import Queue
 
-from scripts.tesseract_model import process_image
+import torch
+from torch import Tensor
+
+from tesseract_model import process_image
+from reinforcement_model import inference
+from pipeline_thread import pipeline_thread
+
+import pyautogui
 
 que = Queue()
 
-def get_pipeline():
-    fps = 30
-    read_shape = (1080, 1920)
-    shared_array = np.memmap("../tmp/screenshot", mode='r', shape=read_shape)
-    T = time.time()
-    flag = False
-
-    global que
-    try:
-        while flag:
-            flag 
-            Y = time.time()
-            if (Y - T > 1 / fps):
-                T = time.time()
-                img = shared_array[:]
-                que.put(img)
-    except Exception as e:
-        print(f"Error in get_pipeline: {e}")
-        return -1
-    
-    print("Pipeline ended")
-
-
-def save_image():
-    global que
+def test_thread(que : Queue):
+    print("Test Thread entered")
     try:
         while True:
             img = que.get()
-            plt.imsave("../tmp/test.jpg" , img , cmap = 'grey')
-            # score, precision = process_image(Image.fromarray(img))
-            # # Print the detected score and precision
-            # print("Detected Score:", score)
-            # print("Detected Precision:", precision)
+            # print("Size of the queue : ",que.qsize())
+            plt.imsave("tmp/test.jpg" , img , cmap = 'grey')
+            # print("Image saved")
     except Exception as e:
         print(f"Error in save_image: {e}")
         return -1
 
+x_in , y_in = pyautogui.position()
+print(x_in , y_in)
+x_in = torch.Tensor([[x_in]])/1920
+y_in = torch.Tensor([[y_in]])/1080
+prev_action = torch.zeros((1,4))
 
+print(x_in , y_in)
 # Create two threads
-thread1 = threading.Thread(target=get_pipeline)
-thread2 = threading.Thread(target=save_image)
+thread1 = threading.Thread(target=pipeline_thread, args=(que,))
+thread2 = threading.Thread(target=inference,args=(que,x_in,y_in, prev_action,))
 
 # Start the threads
 thread1.start()
