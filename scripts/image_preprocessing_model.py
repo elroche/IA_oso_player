@@ -22,6 +22,8 @@ import os
 
 import warnings
 
+import matplotlib.pyplot as plt
+
 # Classe de détecion de contour
 # (utilisation de conv2d (CNN) sur les images)
 class ContourDetector(nn.Module):
@@ -29,10 +31,10 @@ class ContourDetector(nn.Module):
 
         super(ContourDetector, self).__init__()
 
-        # Couches de convolution
-        self.Conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
-        # : division de la taille de la matrice de contours par 2, je trouve ça bien comme résultat
-        self.Conv2 = nn.Conv2d(32, 1, kernel_size=3, stride=1, padding=1)
+        # # Couches de convolution
+        # self.Conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
+        # # : division de la taille de la matrice de contours par 2, je trouve ça bien comme résultat
+        # self.Conv2 = nn.Conv2d(32, 1, kernel_size=3, stride=1, padding=1)
 
         # Couches de pooling
         # division de la taille de la matrice de contours par 4(stride ici a 2 et a la 2e couche de conv stride à 1)
@@ -40,32 +42,17 @@ class ContourDetector(nn.Module):
         self.Flat = nn.Flatten()
 
     def forward(self, x):
-        x = self.Pool(F.relu(self.Conv1(x)))
-        z = self.Pool(F.relu(self.Conv2(x)))
+        # x = self.Pool(F.relu(self.Conv1(x)))
+        # z = self.Pool(F.relu(self.Conv2(x)))
+        x = self.Pool(x)
+        x = self.Pool(x)
+        x = self.Pool(x)
+        z = self.Pool(x)
+        # plt.imshow(z.detach().numpy()[0])
+        # plt.show()
         y = self.Flat(z)
 
         return z, y
-
-
-
-# Fonction de comparaison du score et de la précision de 2 images
-def scores_precision_difference(filtered_result_precedente, filtered_result_actuelle):
-    # Extraire le score et la précision des prédictions
-    previous_score, previous_precision = extraction_score_precision(
-        filtered_result_precedente)
-    current_score, current_precision = extraction_score_precision(
-        filtered_result_actuelle)
-
-    if previous_score is None or current_score is None or previous_precision is None or current_precision is None:
-        print("Aucun nombre détecté. Impossible de calculer la différence.")
-        return None, None
-
-    # Calculer la différence du score et de la précision
-    score_difference = current_score - previous_score
-    precision_difference = current_precision - previous_precision
-
-    return score_difference, precision_difference
-
 
 # Initialisation du modèle, à mettre dans fonction
 contour_model = ContourDetector()

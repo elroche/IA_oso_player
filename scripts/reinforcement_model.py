@@ -9,6 +9,7 @@ import torch.nn.functional as F
 import torch.nn.init as init
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
 contour_model = ContourDetector()
 
@@ -18,8 +19,7 @@ class ReinforcementModel(nn.Module):
         super(ReinforcementModel, self).__init__()
 
         # LSTM layer
-        self.lstm = nn.LSTM(129600 + 1 + 1 + 4, hidden_size,
-                            batch_first=True, num_layers=lag)
+        self.lstm = nn.Linear(8160 + 1 + 1 + 4, hidden_size)
 
         # Fully connected layers for unified predictions
         self.fc1 = nn.Linear(hidden_size, 64)
@@ -50,7 +50,7 @@ class ReinforcementModel(nn.Module):
         # print("Concatenated Input Size:", input_concatenated.size())
 
         # LSTM layer
-        out, _ = self.lstm(input_concatenated.view(
+        out = self.lstm(input_concatenated.view(
             input_concatenated.size(0), 1, -1))
 
         print(a.any() == out.any())
@@ -174,6 +174,7 @@ for i, image_data in enumerate(screenshots):
     # Prétraitement avec le modèle de détection de contours
     image_data = transform(image_data)
     _, contours = contour_model(image_data)
+    print(contours.detach().numpy().sum())
     # Maintenant, contours contient les résultats de la détection de contours
     # print("Dimensions de la première image après contour 1: ", contours.shape)
 
@@ -183,8 +184,8 @@ for i, image_data in enumerate(screenshots):
     # execute_action_and_move(action_out, x_out, y_out)
 
     # Test, Mise à jour pour la prochaine itération
-    x_in = torch.randint(low=1, high=1920, size=(1, 1))/1920
-    y_in = torch.randint(low=1, high=1080, size=(1, 1))/1080
+    # x_in = torch.randint(low=1, high=1920, size=(1, 1))/1920
+    # y_in = torch.randint(low=1, high=1080, size=(1, 1))/1080
     print("X in : ", x_in)
     # print("Y CHANGE : ", y_in)
     prev_action = action_out
