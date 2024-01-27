@@ -22,18 +22,19 @@ import os
 
 import warnings
 
-# Contour detection class
+import matplotlib.pyplot as plt
 
-
+# Classe de détecion de contour
+# (utilisation de conv2d (CNN) sur les images)
 class ContourDetector(nn.Module):
     def __init__(self):
 
         super(ContourDetector, self).__init__()
 
-        # Convolution layers
-        self.Conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
-        # Division of the size of the contour matrix by 2
-        self.Conv2 = nn.Conv2d(32, 1, kernel_size=3, stride=1, padding=1)
+        # # Couches de convolution
+        # self.Conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
+        # # : division de la taille de la matrice de contours par 2, je trouve ça bien comme résultat
+        # self.Conv2 = nn.Conv2d(32, 1, kernel_size=3, stride=1, padding=1)
 
         # Pooling layers
         # Division of the size of the contour matrix by 4
@@ -41,17 +42,19 @@ class ContourDetector(nn.Module):
         self.Flat = nn.Flatten()
 
     def forward(self, x):
-        x = self.Pool(F.relu(self.Conv1(x)))
-        z = self.Pool(F.relu(self.Conv2(x)))
+        # x = self.Pool(F.relu(self.Conv1(x)))
+        # z = self.Pool(F.relu(self.Conv2(x)))
+        x = self.Pool(x)
+        x = self.Pool(x)
+        x = self.Pool(x)
+        z = self.Pool(x)
+        # plt.imshow(z.detach().numpy()[0])
+        # plt.show()
         y = self.Flat(z)
 
         return z, y
 
-##################### Test des fonctions #####################
-
-
-"""
-# Initialise the model
+# Initialisation du modèle, à mettre dans fonction
 contour_model = ContourDetector()
 transform = transforms.Compose(
     [transforms.ToTensor(), transforms.Normalize([0.5, ], [0.5, ])])
