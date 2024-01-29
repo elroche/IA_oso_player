@@ -6,7 +6,7 @@ from torchvision.transforms import functional
 import pytesseract
 
 import matplotlib.pyplot as plt
-import numpy as np 
+import numpy as np
 
 
 import re
@@ -17,40 +17,30 @@ from queue import Queue
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Fonction de la détection du score et de la précision
-def detect_numbers(image):
-    
-    # Récupérer les dimensions originales de l'image
+# Score and accuracy detection function
+
+
+def detect_numbers(image, model):
     width, height = image.size
 
-    # Définir les coordonnées de la région à traiter
+    # Definition of the coordinates of the region to be treated
     region_left = int(0.80 * width)
     region_top = 0
     region_right = width
     region_bottom = int(0.15 * height)
 
-    # Extraire la région à traiter
     region = image.crop((region_left, region_top, region_right, region_bottom))
 
-    plt.imsave("tmp/test_region.jpg",region,cmap='gray')
+    plt.imsave("tmp/test_region.jpg", region, cmap='gray')
 
-    '''
-    # Appliquer les transformations nécessaires à la région
+    # Application of the necessary transformations to the region
     region_tensor = functional.to_tensor(region)
-    region_tensor = region_tensor.unsqueeze(
-        0)  # Ajouter une dimension pour le lot
+    region_tensor = region_tensor.unsqueeze(0)
 
-    # Effectuer l'inférence sur la région
-    with torch.no_grad():
-        prediction = model(region_tensor)
-    '''
-    # Utiliser Tesseract OCR pour reconnaître le texte dans la région
+    # Using Tesseract OCR to recognise text in the region
     result = pytesseract.image_to_string(region)
-    # Filtrer les caractères pour ne conserver que les nombres, et le retour à a ligne pour séparer les 2 résultats
+    # Character filtering
     filtered_result = re.sub(r'[^0-9\n,.]', '', result)
-    
-    '''# Retourner également le résultat filtré pour une utilisation ultérieure
-    return prediction, filtered_result'''
 
     return filtered_result
 
@@ -58,24 +48,23 @@ def detect_numbers(image):
 # Fonction pour extraire le score et la précision à partir du filtered_result
 ## a revoir 
 def extraction_score_precision(filtered_result):
-    # Vérifier si filtered_result est une chaîne vide ou ne contient que des espaces
+    # Check that filtered_result is not an empty string or contains only spaces
     if not filtered_result or filtered_result.isspace() or filtered_result.isalpha():
         print("Aucun nombre détecté.")
         return None, None
 
-    # Extraire le score (le score étant sur la première ligne)
+    # Extraction of the score (the score is on the first line)
     lines = filtered_result.split('\n')
 
-    # Vérifier si lines a au moins une ligne
+    # Check that lines are not invalid
     if not lines:
         print("Aucune ligne trouvée.")
         return None, None
 
-    # Accéder à la première ligne
     first_line = lines[0].replace(',', '.')
 
-    # Vérifier si la première ligne a suffisamment d'éléments
-    if len(lines)<2:
+    # Check that the first line has enough elements
+    if len(lines) < 2:
         print("Aucun élément trouvé dans la première ligne.")
         return None, None
 
@@ -92,21 +81,23 @@ def extraction_score_precision(filtered_result):
     return score, precision
 
 
-# Fonction générale de détection du score et de la précision
-def process_image(image):
-    # Detection des nombres sur l'image
-    filtered_result = detect_numbers(image)
+# General score and precision detection function
+def process_image(image, model):
+    # Detecting numbers in the image
+    filtered_result = detect_numbers(image, model)
 
     if filtered_result is None:
         print("Aucun nombre détecté. Traitement arrêté.")
-        return None , None
-    # Extraire le score et la précision
+        return None, None
+    # Score extraction and accuracy
     score, precision = extraction_score_precision(filtered_result)
     return score, precision
 
-# Fonction de comparaison du score et de la précision de 2 images
+# Compares the score and accuracy of 2 images
+
+
 def scores_precision_difference(filtered_result_precedente, filtered_result_actuelle):
-    # Extraire le score et la précision des prédictions
+    # Extraction of score and prediction accuracy
     previous_score, previous_precision = extraction_score_precision(
         filtered_result_precedente)
     current_score, current_precision = extraction_score_precision(
@@ -116,14 +107,15 @@ def scores_precision_difference(filtered_result_precedente, filtered_result_actu
         print("Aucun nombre détecté. Impossible de calculer la différence.")
         return None, None
 
-    # Calculer la différence du score et de la précision
+    # Calculation of score difference and precision
     score_difference = current_score - previous_score
     precision_difference = current_precision - previous_precision
 
     return score_difference, precision_difference
 
-def tesseract_model(que : Queue):
-    # Charger un modèle Faster R-CNN pré-entraîné
+
+def tesseract_model(que: Queue):
+    # Loading a pre-trained Faster R-CNN model
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         model = fasterrcnn_resnet50_fpn(pretrained=True)
@@ -136,13 +128,13 @@ def tesseract_model(que : Queue):
             img = que.get()
             img.save("tmp/test.jpg")
             # detect_numbers(img,model)
-            score, precision = process_image(img)
+            #  score, precision = process_image(img,model)
             # Print the detected score and precision
             print("Time taken :" ,time.time() - T)
     except Exception as e:
         print(f"Error in tesseract_model: {e}")
         return -1
-    
+
 # img = Image.open("../tmp/test.jpg")
 # process_image(img)
 # que = Queue()

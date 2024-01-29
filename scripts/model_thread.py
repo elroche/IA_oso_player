@@ -6,8 +6,14 @@ from PIL import ImageGrab, Image
 import threading
 from queue import Queue
 
-from tesseract_model import tesseract_model
+import torch
+from torch import Tensor
+
+from tesseract_model import process_image
+from reinforcement_model import inference
 from pipeline_thread import pipeline_thread
+
+import pyautogui
 
 que = Queue()
 
@@ -23,10 +29,16 @@ def test_thread(que : Queue):
         print(f"Error in save_image: {e}")
         return -1
 
+x_in , y_in = pyautogui.position()
+print(x_in , y_in)
+x_in = torch.Tensor([[x_in]])/1920
+y_in = torch.Tensor([[y_in]])/1080
+prev_action = torch.zeros((1,4))
 
+print(x_in , y_in)
 # Create two threads
 thread1 = threading.Thread(target=pipeline_thread, args=(que,))
-thread2 = threading.Thread(target=tesseract_model, args=(que,))
+thread2 = threading.Thread(target=inference,args=(que,x_in,y_in, prev_action,))
 
 # Start the threads
 thread1.start()

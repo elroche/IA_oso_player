@@ -22,6 +22,8 @@ import os
 
 import warnings
 
+import matplotlib.pyplot as plt
+
 # Classe de détecion de contour
 # (utilisation de conv2d (CNN) sur les images)
 class ContourDetector(nn.Module):
@@ -29,19 +31,25 @@ class ContourDetector(nn.Module):
 
         super(ContourDetector, self).__init__()
 
-        # Couches de convolution
-        self.Conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
-        # : division de la taille de la matrice de contours par 2, je trouve ça bien comme résultat
-        self.Conv2 = nn.Conv2d(32, 1, kernel_size=3, stride=1, padding=1)
+        # # Couches de convolution
+        # self.Conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
+        # # : division de la taille de la matrice de contours par 2, je trouve ça bien comme résultat
+        # self.Conv2 = nn.Conv2d(32, 1, kernel_size=3, stride=1, padding=1)
 
-        # Couches de pooling
-        # division de la taille de la matrice de contours par 4(stride ici a 2 et a la 2e couche de conv stride à 1)
+        # Pooling layers
+        # Division of the size of the contour matrix by 4
         self.Pool = nn.MaxPool2d(kernel_size=1, stride=2, padding=0)
         self.Flat = nn.Flatten()
 
     def forward(self, x):
-        x = self.Pool(F.relu(self.Conv1(x)))
-        z = self.Pool(F.relu(self.Conv2(x)))
+        # x = self.Pool(F.relu(self.Conv1(x)))
+        # z = self.Pool(F.relu(self.Conv2(x)))
+        x = self.Pool(x)
+        x = self.Pool(x)
+        x = self.Pool(x)
+        z = self.Pool(x)
+        # plt.imshow(z.detach().numpy()[0])
+        # plt.show()
         y = self.Flat(z)
 
         return z, y
@@ -50,12 +58,8 @@ class ContourDetector(nn.Module):
 contour_model = ContourDetector()
 transform = transforms.Compose(
     [transforms.ToTensor(), transforms.Normalize([0.5, ], [0.5, ])])
-# print(contour_model)
 
-
-##################### Test des fonctions #####################
-
-"""def test_recuperation_image():
+def test_recuperation_image():
     i = 0
     screenshots = []
     while (i < 200):
@@ -92,4 +96,5 @@ score_difference, precision_difference = scores_precision_difference(
 
 # Afficher les résultats du test, cad de la différence du score et de la précision entre les deux images
 print("Différence du score :", score_difference)
-print("Différence de la précision :", precision_difference)"""
+print("Différence de la précision :", precision_difference)
+"""
