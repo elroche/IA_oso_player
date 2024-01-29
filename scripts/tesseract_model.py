@@ -56,6 +56,7 @@ def detect_numbers(image):
 
 
 # Fonction pour extraire le score et la précision à partir du filtered_result
+## a revoir 
 def extraction_score_precision(filtered_result):
     # Vérifier si filtered_result est une chaîne vide ou ne contient que des espaces
     if not filtered_result or filtered_result.isspace() or filtered_result.isalpha():
@@ -64,7 +65,6 @@ def extraction_score_precision(filtered_result):
 
     # Extraire le score (le score étant sur la première ligne)
     lines = filtered_result.split('\n')
-    print(lines)
 
     # Vérifier si lines a au moins une ligne
     if not lines:
@@ -138,8 +138,6 @@ def tesseract_model(que : Queue):
             # detect_numbers(img,model)
             score, precision = process_image(img)
             # Print the detected score and precision
-            print("Detected Score:", score)
-            print("Detected Precision:", precision)
             print("Time taken :" ,time.time() - T)
     except Exception as e:
         print(f"Error in tesseract_model: {e}")
