@@ -50,6 +50,9 @@ def extraction_score_precision(filtered_result):
     if not lines:
         print("Aucune ligne trouvée.")
         return None
+    elif lines[0] == '':
+        print("Aucun nombre détecté.")
+        return None
 
     return float(lines[0])
 
