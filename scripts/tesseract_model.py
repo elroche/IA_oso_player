@@ -20,13 +20,13 @@ def detect_numbers(image):
 
     # Definition of the coordinates of the region to be treated
     region_left = int(0.80 * width)
-    region_top = 0
+    region_top = int(0.07 * height)
     region_right = width
-    region_bottom = int(0.15 * height)
+    region_bottom = int(0.20 * height)
 
     region = image.crop((region_left, region_top, region_right, region_bottom))
 
-    # plt.imsave("tmp/test_region.jpg", region, cmap='gray')
+    plt.imsave("tmp/test_region.jpg", region, cmap='gray')
 
     # Using Tesseract OCR to recognise text in the region
     result = pytesseract.image_to_string(region)
