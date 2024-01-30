@@ -2,8 +2,6 @@ from image_preprocessing_model import ContourDetector
 import torch
 import torch.nn as nn
 import pyautogui
-from PIL import Image
-from PIL import ImageGrab
 from torchvision import transforms
 import torch.nn.functional as F
 import torch.nn.init as init
@@ -13,7 +11,7 @@ import queue
 
 contour_model = ContourDetector()
 
-
+# ReinforcementModel class definition for a neural network model
 class ReinforcementModel(nn.Module):
     def __init__(self, hidden_size):
         super(ReinforcementModel, self).__init__()
@@ -59,15 +57,15 @@ class ReinforcementModel(nn.Module):
         return action_out, x_out, y_out
 
 
-# Obtenir les dimensions de l'écran principal
+# Get main screen dimensions
 screen_width, screen_height = pyautogui.size()
 
-# Fonction pour exécuter l'action et le déplacement
+# Function to execute action and move
 def execute_action_and_move(action, x_out, y_out):
-    # Convertir la sortie du modèle en action réelle
+    # Convert model output to real action
     action_index = torch.argmax(action, dim=1).item()
 
-    # Exécuter l'action correspondante
+    # Execute the corresponding action
     if action_index == 0:  # Exemple : "clic"
         pyautogui.click()
     elif action_index == 1:  # Exemple : "clic_down"
@@ -75,9 +73,9 @@ def execute_action_and_move(action, x_out, y_out):
     elif action_index == 2:  # Exemple : "clic_up"
         pyautogui.mouseUp()
     else:  # action_index == 3, "None"
-        pass  # Aucune action
+        pass  # None action
 
-    # Déplacer la souris vers la position
+    # Move mouse to position
     target_x = int(x_out.item()*screen_width)
     target_y = int(y_out.item()*screen_height)
     pyautogui.moveTo(target_x, target_y)
@@ -88,29 +86,25 @@ hidden_size = 128
 num_classes = 4  # clic, clic_down, clic_up, None
 lag = 20
 
+# Model initialization
 model = ReinforcementModel(hidden_size)
 
-
-####################################### Tests #######################################
-
-def test_recuperation_image(folder_path="images_test"):
-    screenshots = []
-    for i in range(19):
-        image_path = os.path.join(folder_path, f"image_{i+1}.jpg")
-        screenshot = Image.open(image_path).convert('L')
-        screenshots.append(screenshot)
-    return screenshots
-
+# To convert PIL images to PyTorch tensors and pixel values to normalized values.
 transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize([0.5, ], [0.5, ])])
 
+# Function for continuous inference using the provided queue, current x and y coordinates, and the previous action list.
 def inference(que : queue.Queue , x_in : float , y_in : float , prev_action : list) -> None:
     while True:
+        # Get screenshot from the queue
         screenshot = que.get()
+        # Initialize previous action as zeros
         prev_action = torch.zeros((1, num_classes))
-        # Prétraitement avec le modèle de détection de contours
+        # Preprocessing with the edge detection model
         image_data = transform(screenshot)
         _, contours = contour_model(image_data)
+        # Run inference using the main model
         action_out, x_out, y_out = model(
             contours, x_in, y_in, prev_action)
+
         print(action_out.detach(), x_out.detach().float(), y_out.detach().float())
         # execute_action_and_move(action_out, x_out, y_out)
