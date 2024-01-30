@@ -1,24 +1,21 @@
 [tool.poetry]
 name = "ia-osu-player_cuda"
 version = "0.1.0"
-description = ""
-authors = ["elroche <elroche@ensc.fr>"]
+description = "Projet réalisé par les étudiants de l'ENSC [ROCHE Eléa](https://github.com/elroche) et [PERRET Quentin](https://github.com/QuentinPerret)."
+authors = ["elroche <elroche@ensc.fr>" , qperret <quentinprrt33@gmail.com>]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
 numpy = "^1.23.2"
-pandas = "^2.1.1"
 matplotlib = "^3.8.0"
-seaborn = "^0.12.2"
-scikit-learn = "^1.3.1"
-torch = { version = "^2.0.0 , !=2.0.1", source = "torch-cu117" }
-torchvision = { version = "^0.15.1", source = "torch-cu117" }
 opencv-python = "^4.7.0"
 pyautogui = "^0.9.54"
 pytesseract = "^0.3.10"
 tesseract = "^0.1.3"
-pynput = "^1.7.6"
+
+torch = { version = "^2.0.0 , !=2.0.1", source = "torch-cu117" }
+torchvision = { version = "^0.15.1", source = "torch-cu117" }
 
 [tool.poetry.group.dev.dependencies]
 jupytext = "^1.15.2"
@@ -39,6 +36,3 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.jupytext]
 formats = "notebooks///ipynb,scripts///py:percent"
-
-## To NOT install cuda use the following command : poetry install --without torch-cu117 
-## If willing to use torch cpu , use after : pip install torch
