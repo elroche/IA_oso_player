@@ -2,7 +2,7 @@
 name = "ia-osu-player_cpu"
 version = "0.1.0"
 description = "Projet réalisé par les étudiants de l'ENSC [ROCHE Eléa](https://github.com/elroche) et [PERRET Quentin](https://github.com/QuentinPerret)."
-authors = ["elroche <elroche@ensc.fr>" , qperret <quentinprrt33@gmail.com>]
+authors = ["elroche <elroche@ensc.fr>" , "qperret <quentinprrt33@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
