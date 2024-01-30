@@ -3,10 +3,6 @@ import torch
 import torch.nn as nn
 import pyautogui
 from torchvision import transforms
-import torch.nn.functional as F
-import torch.nn.init as init
-import numpy as np
-import os
 import queue
 
 contour_model = ContourDetector()
@@ -60,27 +56,6 @@ class ReinforcementModel(nn.Module):
 # Get main screen dimensions
 screen_width, screen_height = pyautogui.size()
 
-# Function to execute action and move
-def execute_action_and_move(action, x_out, y_out):
-    # Convert model output to real action
-    action_index = torch.argmax(action, dim=1).item()
-
-    # Execute the corresponding action
-    if action_index == 0:  # Exemple : "clic"
-        pyautogui.click()
-    elif action_index == 1:  # Exemple : "clic_down"
-        pyautogui.mouseDown()
-    elif action_index == 2:  # Exemple : "clic_up"
-        pyautogui.mouseUp()
-    else:  # action_index == 3, "None"
-        pass  # None action
-
-    # Move mouse to position
-    target_x = int(x_out.item()*screen_width)
-    target_y = int(y_out.item()*screen_height)
-    pyautogui.moveTo(target_x, target_y)
-
-
 input_size = 270 * 480
 hidden_size = 128
 num_classes = 4  # clic, clic_down, clic_up, None
@@ -105,6 +80,25 @@ def inference(que : queue.Queue , x_in : float , y_in : float , prev_action : li
         # Run inference using the main model
         action_out, x_out, y_out = model(
             contours, x_in, y_in, prev_action)
+        execute_action_and_move(action_out, x_out, y_out)
 
-        print(action_out.detach(), x_out.detach().float(), y_out.detach().float())
-        # execute_action_and_move(action_out, x_out, y_out)
+
+# Function to execute action and move
+def execute_action_and_move(action, x_out, y_out):
+    # Convert model output to real actionp
+    action_index = torch.argmax(action, dim=2).item()
+
+    # Execute the corresponding action
+    if action_index == 0:  # Exemple : "clic"
+        pyautogui.click()
+    elif action_index == 1:  # Exemple : "clic_down"
+        pyautogui.mouseDown()
+    elif action_index == 2:  # Exemple : "clic_up"
+        pyautogui.mouseUp()
+    else:  # action_index == 3, "None"
+        pass  # None action
+
+    # Move mouse to position
+    target_x = int(x_out.item()*screen_width)
+    target_y = int(y_out.item()*screen_height)
+    pyautogui.moveTo(target_x, target_y)
