@@ -14,7 +14,7 @@ import pyautogui
 
 import argparse
 
-parser = argparse.ArgumentParser(description='A test program.')
+parser = argparse.ArgumentParser(description='All usable thread are presented here.')
 
 parser.add_argument("-t", "--tesseract", help="Lauch the tesseract thread.", action="store_true")
 parser.add_argument("-i", "--inference", help="Lauch the reinforcment model thread.", action="store_true")

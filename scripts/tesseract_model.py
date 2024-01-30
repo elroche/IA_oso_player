@@ -54,7 +54,6 @@ def extraction_score_precision(filtered_result):
     elif lines[0] == '':
         print("Aucun nombre détecté.")
         return None
-    print(lines[0])
     precision  = lines[0].replace(',','.')
     precision  = precision.replace('-','.')
     return float(precision)
