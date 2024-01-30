@@ -6,20 +6,15 @@ from torchvision.transforms import functional
 import pytesseract
 
 import matplotlib.pyplot as plt
-import numpy as np
-
 
 import re
 import warnings
 import time
-from PIL import Image
 from queue import Queue
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Score and accuracy detection function
-
-
 def detect_numbers(image, model):
     width, height = image.size
 
@@ -45,8 +40,7 @@ def detect_numbers(image, model):
     return filtered_result
 
 
-# Fonction pour extraire le score et la précision à partir du filtered_result
-## a revoir 
+# Function for extracting score and precision from the filtered result
 def extraction_score_precision(filtered_result):
     # Check that filtered_result is not an empty string or contains only spaces
     if not filtered_result or filtered_result.isspace() or filtered_result.isalpha():
@@ -71,11 +65,6 @@ def extraction_score_precision(filtered_result):
     score_str = first_line[-1]
     score = int(score_str)
 
-    ''' # Extraire la précision (la précision étant sur la deuxième ligne)
-    precision_str = lines[1].strip().replace('%', '')
-    # Remplacer la virgule par un point
-    precision_str = precision_str.replace(',', '.')
-    precision = float(precision_str)'''
     precision = 0
 
     return score, precision
@@ -86,6 +75,7 @@ def process_image(image, model):
     # Detecting numbers in the image
     filtered_result = detect_numbers(image, model)
 
+    # Checks that a number is detected
     if filtered_result is None:
         print("Aucun nombre détecté. Traitement arrêté.")
         return None, None
@@ -94,8 +84,6 @@ def process_image(image, model):
     return score, precision
 
 # Compares the score and accuracy of 2 images
-
-
 def scores_precision_difference(filtered_result_precedente, filtered_result_actuelle):
     # Extraction of score and prediction accuracy
     previous_score, previous_precision = extraction_score_precision(
@@ -113,7 +101,7 @@ def scores_precision_difference(filtered_result_precedente, filtered_result_actu
 
     return score_difference, precision_difference
 
-
+# Function to load a pre-trained Faster R-CNN model and continuously process images from a queue.
 def tesseract_model(que: Queue):
     # Loading a pre-trained Faster R-CNN model
     with warnings.catch_warnings():
@@ -122,21 +110,13 @@ def tesseract_model(que: Queue):
         model.eval()
     warnings.resetwarnings()
 
+    # Try to continuously process images from the queue
     try:
         while True:
             T = time.time()
             img = que.get()
             img.save("tmp/test.jpg")
-            # detect_numbers(img,model)
-            #  score, precision = process_image(img,model)
-            # Print the detected score and precision
             print("Time taken :" ,time.time() - T)
     except Exception as e:
         print(f"Error in tesseract_model: {e}")
         return -1
-
-# img = Image.open("../tmp/test.jpg")
-# process_image(img)
-# que = Queue()
-# que.put(img)
-# tesseract_model(que)
