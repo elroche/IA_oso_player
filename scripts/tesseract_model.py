@@ -31,7 +31,8 @@ def detect_numbers(image):
     # Using Tesseract OCR to recognise text in the region
     result = pytesseract.image_to_string(region)
     # Character filtering
-    filtered_result = re.sub(r'[^0-9\n,.]', '', result)
+    print(result)
+    filtered_result = re.sub(r'[^0-9\n.,-]', '', result)
 
     return filtered_result
 
@@ -53,8 +54,10 @@ def extraction_score_precision(filtered_result):
     elif lines[0] == '':
         print("Aucun nombre détecté.")
         return None
-
-    return float(lines[0])
+    print(lines[0])
+    precision  = lines[0].replace(',','.')
+    precision  = precision.replace('-','.')
+    return float(precision)
 
 
 # General score and precision detection function
