@@ -15,7 +15,7 @@ from queue import Queue
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Score and accuracy detection function
-def detect_numbers(image, model):
+def detect_numbers(image):
     width, height = image.size
 
     # Definition of the coordinates of the region to be treated
@@ -26,11 +26,7 @@ def detect_numbers(image, model):
 
     region = image.crop((region_left, region_top, region_right, region_bottom))
 
-    plt.imsave("tmp/test_region.jpg", region, cmap='gray')
-
-    # Application of the necessary transformations to the region
-    region_tensor = functional.to_tensor(region)
-    region_tensor = region_tensor.unsqueeze(0)
+    # plt.imsave("tmp/test_region.jpg", region, cmap='gray')
 
     # Using Tesseract OCR to recognise text in the region
     result = pytesseract.image_to_string(region)
@@ -45,7 +41,7 @@ def extraction_score_precision(filtered_result):
     # Check that filtered_result is not an empty string or contains only spaces
     if not filtered_result or filtered_result.isspace() or filtered_result.isalpha():
         print("Aucun nombre détecté.")
-        return None, None
+        return None
 
     # Extraction of the score (the score is on the first line)
     lines = filtered_result.split('\n')
@@ -53,70 +49,29 @@ def extraction_score_precision(filtered_result):
     # Check that lines are not invalid
     if not lines:
         print("Aucune ligne trouvée.")
-        return None, None
+        return None
 
-    first_line = lines[0].replace(',', '.')
-
-    # Check that the first line has enough elements
-    if len(lines) < 2:
-        print("Aucun élément trouvé dans la première ligne.")
-        return None, None
-
-    score_str = first_line[-1]
-    score = int(score_str)
-
-    precision = 0
-
-    return score, precision
+    return float(lines[0])
 
 
 # General score and precision detection function
-def process_image(image, model):
+def process_image(image):
     # Detecting numbers in the image
-    filtered_result = detect_numbers(image, model)
-
-    # Checks that a number is detected
-    if filtered_result is None:
-        print("Aucun nombre détecté. Traitement arrêté.")
-        return None, None
+    filtered_result = detect_numbers(image)
     # Score extraction and accuracy
-    score, precision = extraction_score_precision(filtered_result)
-    return score, precision
+    return extraction_score_precision(filtered_result)
 
-# Compares the score and accuracy of 2 images
-def scores_precision_difference(filtered_result_precedente, filtered_result_actuelle):
-    # Extraction of score and prediction accuracy
-    previous_score, previous_precision = extraction_score_precision(
-        filtered_result_precedente)
-    current_score, current_precision = extraction_score_precision(
-        filtered_result_actuelle)
-
-    if previous_score is None or current_score is None or previous_precision is None or current_precision is None:
-        print("Aucun nombre détecté. Impossible de calculer la différence.")
-        return None, None
-
-    # Calculation of score difference and precision
-    score_difference = current_score - previous_score
-    precision_difference = current_precision - previous_precision
-
-    return score_difference, precision_difference
 
 # Function to load a pre-trained Faster R-CNN model and continuously process images from a queue.
 def tesseract_model(que: Queue):
-    # Loading a pre-trained Faster R-CNN model
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        model = fasterrcnn_resnet50_fpn(pretrained=True)
-        model.eval()
-    warnings.resetwarnings()
-
     # Try to continuously process images from the queue
     try:
         while True:
             T = time.time()
             img = que.get()
-            img.save("tmp/test.jpg")
-            print("Time taken :" ,time.time() - T)
+            precision  = process_image(img)
+            print('Precision : ', precision)
+            # print("Time taken :" ,time.time() - T)
     except Exception as e:
         print(f"Error in tesseract_model: {e}")
         return -1

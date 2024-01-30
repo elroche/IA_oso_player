@@ -6,12 +6,21 @@ from queue import Queue
 import torch
 from torch import Tensor
 
-from tesseract_model import process_image
+from tesseract_model import tesseract_model
 from reinforcement_model import inference
 from pipeline_thread import pipeline_thread
 
 import pyautogui
 
+import argparse
+
+parser = argparse.ArgumentParser(description='A test program.')
+
+parser.add_argument("-t", "--tesseract", help="Lauch the tesseract thread.", action="store_true")
+parser.add_argument("-i", "--inference", help="Lauch the reinforcment model thread.", action="store_true")
+parser.add_argument("-p", "--pipeline", help="Lauch the pipeline thread.", action="store_true")
+
+args = parser.parse_args()
 # Create a queue for communication between threads
 que = Queue()
 
@@ -34,7 +43,12 @@ prev_action = torch.zeros((1,4))
 
 # Create two threads
 thread1 = threading.Thread(target=pipeline_thread, args=(que,))
-thread2 = threading.Thread(target=inference,args=(que,x_in,y_in, prev_action,))
+if args.inference : 
+    thread2 = threading.Thread(target=inference,args=(que,x_in,y_in, prev_action,))
+elif args.tesseract : 
+    thread2 = threading.Thread(target=tesseract_model,args=(que,))
+elif args.pipeline : 
+    thread2 = threading.Thread(target=test_thread,args=(que,))
 
 # Start the threads
 thread1.start()
