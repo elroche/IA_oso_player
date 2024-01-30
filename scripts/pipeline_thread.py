@@ -8,7 +8,6 @@ fps  = 30
 myshape = (1080,1920)
 
 # Flags to control the pipeline
-use_flag = False
 pausing_flag  = False
 
 # Callback function triggered when the "p" key or "escape" key is released.
@@ -37,4 +36,7 @@ def pipeline_thread(que : Queue) -> None:
                 screenshot = ImageGrab.grab(bbox=(0,0,1920,1080)).convert('L')
                 # Put the screenshot into the queue for further processing
                 que.put(screenshot)
+            elif not pausing_flag : 
+                with que.mutex: que.queue.clear()
+
             
