@@ -31,7 +31,6 @@ def detect_numbers(image):
     # Using Tesseract OCR to recognise text in the region
     result = pytesseract.image_to_string(region)
     # Character filtering
-    print(result)
     filtered_result = re.sub(r'[^0-9\n.,-]', '', result)
 
     return filtered_result
